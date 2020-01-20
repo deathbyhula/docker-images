@@ -1,6 +1,6 @@
-FROM centos:7
+FROM debian:buster
 
-ENV KEYCLOAK_VERSION 7.0.0
+ENV KEYCLOAK_VERSION 7.0.1
 ENV JDBC_POSTGRES_VERSION 42.2.5
 ENV JDBC_MYSQL_VERSION 5.1.46
 ENV JDBC_MARIADB_VERSION 2.2.3
@@ -16,29 +16,38 @@ ARG GIT_BRANCH
 ARG KEYCLOAK_DIST=https://downloads.jboss.org/keycloak/$KEYCLOAK_VERSION/keycloak-$KEYCLOAK_VERSION.tar.gz
 
 USER root
-
-RUN yum update -y \
-	&& yum install -y xmlstarlet saxon augeas bsdtar unzip \
-	&& yum install -y java-1.8.0-openjdk-devel \
-	&& yum install -y epel-release git \
-	&& yum install -y jq openssl which \
-	&& yum clean all
-RUN groupadd -r jboss -g 1000 \
-	&& useradd -u 1000 -r -g jboss -m -d /opt/jboss -s /sbin/nologin -c "JBoss user" jboss \
-	&& chmod 755 /opt/jboss
 WORKDIR /opt/jboss
 
-ENV JAVA_HOME /usr/lib/jvm/java
+RUN apt-get -qq update \
+	&& apt-get install -y --no-install-recommends \
+		bsdtar \
+    curl \
+		unzip \
+		openjdk-8-jdk-headless \
+		jq \
+		openssl \
+		ca-certificates \
+    ca-certificates-java \
+		subversion \
+	&& rm -rf /var/lib/apt/lists/* \
+  && update-ca-certificates \
+	&& svn export https://github.com/keycloak/keycloak-containers.git/tags/$KEYCLOAK_VERSION/server/tools tools \
+	&& apt-get remove -y --purge subversion
 
-ADD tools /opt/jboss/tools
-RUN /opt/jboss/tools/build-keycloak.sh
+#ENV JAVA_HOME /usr/lib/jvm/default-java
+
+RUN groupadd -r jboss -g 1000 \
+	&& useradd -u 1000 -r -g jboss -m -d /opt/jboss -s /sbin/nologin -c "JBoss user" jboss \
+	&& chmod 755 /opt/jboss \
+  && export JAVA_HOME=""/usr/lib/openjdk-8-jdk-$(dpkg --print-architecture)""
+
+RUN sh /opt/jboss/tools/build-keycloak.sh
 
 USER jboss
 
 EXPOSE 8080
 EXPOSE 8443
 
-ENTRYPOINT [ "/opt/jboss/tools/docker-entrypoint.sh" ]
-
+ENTRYPOINT ["/opt/jboss/tools/docker-entrypoint.sh"]
 CMD ["-b", "0.0.0.0"]
 
