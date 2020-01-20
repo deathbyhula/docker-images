@@ -1,0 +1,5 @@
+#!/bin/sh
+
+VERSION="7.0.1"
+
+docker buildx build --build-arg "GIT_REF=${VERSION}" --platform linux/amd64,linux/arm64,linux/arm/v7 -t "andban/keycloak:${VERSION}" . --push

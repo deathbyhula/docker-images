@@ -23,7 +23,7 @@ RUN apt-get -qq update \
 		bsdtar \
     curl \
 		unzip \
-		openjdk-8-jdk-headless \
+		openjdk-11-jdk-headless \
 		jq \
 		openssl \
 		ca-certificates \
@@ -39,7 +39,7 @@ RUN apt-get -qq update \
 RUN groupadd -r jboss -g 1000 \
 	&& useradd -u 1000 -r -g jboss -m -d /opt/jboss -s /sbin/nologin -c "JBoss user" jboss \
 	&& chmod 755 /opt/jboss \
-  && export JAVA_HOME=""/usr/lib/openjdk-8-jdk-$(dpkg --print-architecture)""
+  && export JAVA_HOME=""/usr/lib/openjdk-11-jdk-$(dpkg --print-architecture)""
 
 RUN sh /opt/jboss/tools/build-keycloak.sh
 
