@@ -16,6 +16,7 @@ RUN apk update \
 		make \
 		musl-dev \
 		openssl \
+		tzdata \
 	&& update-ca-certificates
 
 ENV USER=keycloak
@@ -46,6 +47,7 @@ FROM scratch
 
 ENV PROXY_LISTEN=:3000
 
+COPY --from=build /usr/share/zoneinfo /usr/share/zoneinfo
 COPY --from=build /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 COPY --from=build /etc/passwd /etc/passwd
 COPY --from=build /etc/group  /etc/group
