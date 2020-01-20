@@ -1,0 +1,22 @@
+version: '3.6'
+
+services:
+        keycloak:
+                image: keycloak:7.0.0-raspian
+                environment:
+       #                 KEYCLOAK_USER: admin
+       #                 KEYCLOAK_PASSWORD: admin
+                        DB_USER: keycloak
+                        DB_PASSWORD: password
+                        DB_DATABASE: keycloak
+                depends_on:
+                        - postgres
+                ports:
+                        - 8443:8443
+        postgres:
+                image: postgres
+                environment:
+                       POSTGRES_DB: keycloak
+                       POSTGRES_USER: keycloak
+                       POSTGRES_PASSWORD: password
+
